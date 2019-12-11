@@ -9,13 +9,9 @@ class AddBook extends Component {
     authors: [],
     bookName: '',
     genre: '',
+    authorId: undefined,
   }
  
-  handleChange = e => {
-    const {name, value} = e.target;
-    this.setState({[name]: value}, ()=>{
-    });
-  }
   async componentDidMount() {
     const getAuthors = `
     {
@@ -31,14 +27,44 @@ class AddBook extends Component {
    const { data } = response;
    this.setState({authors: data.data.authors})
   }
-   
+  
+  handleChange = e => {
+    const {name, value} = e.target;
+    this.setState({[name]: value});
+  }
+
+  handleAddButton = async () => {
+    const { bookName, genre, authorId } = this.state;
+    const addNewBook = `
+     mutation{
+       addBook(id: 11, name: "${bookName}", genre: "${genre}", authorId: ${authorId}){
+         name 
+       }
+     }
+    `;
+    const response = await axios.post('http://localhost:4000/graphql', {
+      query: addNewBook,
+    });
+    const {data:{data:{addBook}}} = response;
+    if(addBook){
+      this.props.updateBookAdded(true);
+    } else {
+      this.props.updateBookAdded(false);
+    }
+    this.setState({bookName: '', genre: '', authorId: undefined});
+  }
+
+  handleDropDown = e => {
+    this.setState({authorId: e.target.value});
+  }
+
   render(){
     const { authors, bookName, genre } = this.state;
-    const renderAuthors = authors.length ? authors.map((item, idx)=><option key={idx} value={item.name}>{item.name}</option>) : [];
+    const renderAuthors = authors.length ? authors.map((item, idx)=><option key={idx} value={item.id}>{item.name}</option>) : [];
     return (
      <div className='add-book-container'>
        <div className='add-book-left'>
-         <span><i className='fas fa-plus-circle add-button'></i></span>
+         <span><i className='fas fa-plus-circle add-button' onClick={this.handleAddButton}></i></span>
        </div>
        <div className='add-book-right'>
          <div className='field'>
@@ -62,7 +88,7 @@ class AddBook extends Component {
              <label>Author:</label>             
            </div>
            <div className='field-right'>
-              <select className='select-option'>
+              <select className='select-option' onChange={this.handleDropDown}>
                 {renderAuthors}
               </select>
            </div>

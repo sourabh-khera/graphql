@@ -10,20 +10,25 @@ import './style.scss';
 
 class BooksLibrary extends Component {
   
-  state = {id: undefined}
+  state = {id: undefined, bookAdded: false}
 
   handleBookClick = id => {
     this.setState({id});
   }
+
+  updateBookAdded = added => {
+   this.setState({bookAdded: added});
+  }
+
   render() {
-    const { id } = this.state;
+    const { id, bookAdded } = this.state;
     const showInfo = id ? <BookInfo bookId={id} /> : null;
     return (
       <div className='division-container'>
         <div className='left-division'>
           <Heading />
-          <BookList handleClick={this.handleBookClick}/>
-          <AddBook />
+          <BookList handleClick={this.handleBookClick} bookAdded={bookAdded}/>
+          <AddBook updateBookAdded={this.updateBookAdded}/>
         </div>
         <div className='right-division'>
           {showInfo}
